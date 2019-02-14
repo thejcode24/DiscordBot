@@ -1,12 +1,13 @@
 import discord, sys, requests, os
 from random import randint
+from joke import Joke
 
 client = discord.Client()
 
 # Use PATH variables to access sensitive keys.
 token = os.environ.get("DISCORD_TOKEN")
 my_key = os.environ.get("GIPHY_KEY")
-
+guild_key = os.environ.get("DISCORD_GUILD")
 
 def community_report(guild):
     """
@@ -24,6 +25,20 @@ def community_report(guild):
         else:
             idle+=1
     return online, offline, idle
+
+def dadjokes():
+    """
+    Gets JSON data from the icanhazdadjoke.com public API which returns a random 'dad' joke.
+    """
+    r = requests.get("https://icanhazdadjoke.com", headers={"Accept":"application/json"})
+    r_joke = r.json()
+
+    joke = Joke(r_joke["id"], r_joke["joke"])
+    print(joke)
+    # return joke
+
+    # if r_joke["status"]==200:
+        
 
 # def pubg(ign):
 #     ign = message.content[6:]
@@ -43,7 +58,7 @@ async def on_message(message):
     print(f"{message.channel}: {message.author}: {message.author.name}: \n{message.content}")
 
     # access discord server/guild information
-    guild = client.get_guild(323164582422249473)
+    guild = client.get_guild(guild_key)
 
     if message.content.startswith("!commands"):
         await message.channel.send("Possible Commands:\n!community - shows online/offline/idle members in server\n"+
@@ -64,6 +79,9 @@ async def on_message(message):
         ign = message.content[6:]
         await message.channel.send("https://pubg.op.gg/user/"+ign+"?server=na")
 
+    elif message.content.startswith("!dadjoke"):
+        dadjokes()
+        # await message.channel.send(joke)
 
     elif message.content.startswith("!gifme"):
         await message.channel.send("fetching a random gif from the gif machine...")
